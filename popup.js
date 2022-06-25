@@ -22,6 +22,7 @@ const addNewBookmark = (bookmarks, bookmark) => {
 };
 
 const viewBookmarks = (currentBookmarks=[]) => {
+  console.log("loaded my extension")
   const bookmarksElement = document.getElementById("bookmarks");
   bookmarksElement.innerHTML = "";
 
@@ -31,7 +32,7 @@ const viewBookmarks = (currentBookmarks=[]) => {
       addNewBookmark(bookmarksElement, bookmark);
     }
   } else {
-    bookmarksElement.innerHTML = '<i class="row">No bookmarks to show</i>';
+    bookmarksElement.innerHTML = '<i class="row">No bookmarks to show changed</i>';
   }
 
   return;
@@ -72,6 +73,7 @@ const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
+
   const activeTab = await getActiveTabURL();
   const queryParameters = activeTab.url.split("?")[1];
   const urlParameters = new URLSearchParams(queryParameters);
