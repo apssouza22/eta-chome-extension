@@ -1,7 +1,7 @@
 {
   "name": "Eta tests",
   "version": "0.1.0",
-  "description": "Saving timestamps in YT videos",
+  "description": "Enable automated tests on the Eta UI",
   "permissions": ["storage", "tabs"],
   "host_permissions": ["https://*.rcqa10.com/*"],
   "background": {

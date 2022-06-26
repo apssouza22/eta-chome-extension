@@ -35,7 +35,6 @@ respondToMutation(document.querySelector("#modals-container"), function (i) {
         modalHandle = "checkout"
     }
 
-
     if (modalHandle === "closeTo") {
         console.log("Closing To modal")
         modalHandle = "date"
@@ -153,18 +152,6 @@ function waitModalStationTo() {
     }, 1000)
 }
 
-function createBtn() {
-    // create a new div element
-    const newDiv = document.createElement("button");
-    newDiv.textContent = "run automate test"
-    newDiv.classList.add("btn-run-test")
-    newDiv.style.position = 'absolute';
-    newDiv.style.right = '0';
-    newDiv.style.zIndex = '100';
-    newDiv.style.top = '0';
-    newDiv.addEventListener("click", startTests)
-    document.querySelector("body").appendChild(newDiv)
-}
 function startTests(e) {
     waitDepartCalendar();
     waitModalStationTo();
@@ -175,9 +162,6 @@ function startTests(e) {
 }
 
 (() => {
-    console.log("load btn")
-    createBtn()
-
     chrome.runtime.onMessage.addListener((obj, sender, response) => {
         console.log("received message: " + JSON.stringify(obj))
         const { type, value, videoId } = obj;
