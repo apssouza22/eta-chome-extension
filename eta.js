@@ -1,26 +1,54 @@
 // Start observing mutation of element. On change, the
 //   the callback is called with Boolean visibility as
 //   argument:
-function createBtn() {
-    // create a new div element
-    const newDiv = document.createElement("button");
-    newDiv.textContent = "run automate test"
-    newDiv.classList.add("btn-run-test")
-    newDiv.style.position = 'absolute';
-    newDiv.style.right = '0';
-    newDiv.style.zIndex = '100';
-    newDiv.style.top = '0';
-    newDiv.addEventListener("click", function (e) {
-        waitDepartCalendar();
-        waitModalStationTo();
-        // select train segment
-        document.querySelector("#root > div > div:nth-child(1) > div > div > div > div > button:nth-child(2)").click()
-        // select From
-        document.querySelector("#root > div > div > div > div > div > div:nth-child(3) > div > div > button:nth-child(1)").click()
-    })
-    document.querySelector("body").appendChild(newDiv)
 
-}
+respondToMutation(document.querySelector("#modals-container"), function (i) {
+    console.log(modalHandle)
+    if (modalHandle === "from") {
+        console.log("Selecting station FROM")
+        let selector = document.querySelector("#modals-container > div > div li");
+        stationFrom = selector.textContent
+        selector.click()
+        modalHandle = "to"
+        setTimeout(function () {
+            document.querySelector("#root > div > div > div > div > div > div:nth-child(3) > div > div > button:nth-child(2)").click()
+        }, 500)
+        return
+    }
+
+    if (modalHandle === "fare") {
+        console.log("Selecting fare")
+        document.querySelector("#modals-container > div > div > div > div > div > div > button").click()
+        modalHandle = "closeFare"
+        waitPreferencePage();
+    }
+    if (modalHandle === "preference") {
+        console.log("Select Preference")
+        document.querySelector("#modals-container > div > div > div > div > button").click()
+        modalHandle = "closePreference"
+    }
+    if (modalHandle === "closePreference") {
+        console.log("checkout btn clicked")
+        document.querySelector("#root button[data-tracking-id='rtp-checkout-button']").click()
+        waitTravelInfoPage();
+        waitPaymentPage();
+        modalHandle = "checkout"
+    }
+
+
+    if (modalHandle === "closeTo") {
+        console.log("Closing To modal")
+        modalHandle = "date"
+    }
+    if (modalHandle === "closeDate") {
+        console.log("Closing Date modal")
+        setTimeout(function () {
+            document.querySelector("#root > div > div > div > div > div > div:nth-child(6) button").click()
+            waitJourneysPage();
+        }, 1000)
+        modalHandle = ""
+    }
+})
 
 function respondToMutation(element, callback) {
     // create an observer instance
@@ -125,52 +153,39 @@ function waitModalStationTo() {
     }, 1000)
 }
 
-respondToMutation(document.querySelector("#modals-container"), function (i) {
-    console.log(modalHandle)
-    if (modalHandle === "from") {
-        console.log("Selecting station FROM")
-        let selector = document.querySelector("#modals-container > div > div li");
-        stationFrom = selector.textContent
-        selector.click()
-        modalHandle = "to"
-        setTimeout(function () {
-            document.querySelector("#root > div > div > div > div > div > div:nth-child(3) > div > div > button:nth-child(2)").click()
-        }, 500)
-        return
-    }
+function createBtn() {
+    // create a new div element
+    const newDiv = document.createElement("button");
+    newDiv.textContent = "run automate test"
+    newDiv.classList.add("btn-run-test")
+    newDiv.style.position = 'absolute';
+    newDiv.style.right = '0';
+    newDiv.style.zIndex = '100';
+    newDiv.style.top = '0';
+    newDiv.addEventListener("click", startTests)
+    document.querySelector("body").appendChild(newDiv)
+}
+function startTests(e) {
+    waitDepartCalendar();
+    waitModalStationTo();
+    // select train segment
+    document.querySelector("#root > div > div:nth-child(1) > div > div > div > div > button:nth-child(2)").click()
+    // select From
+    document.querySelector("#root > div > div > div > div > div > div:nth-child(3) > div > div > button:nth-child(1)").click()
+}
 
-    if (modalHandle === "fare") {
-        console.log("Selecting fare")
-        document.querySelector("#modals-container > div > div > div > div > div > div > button").click()
-        modalHandle = "closeFare"
-        waitPreferencePage();
-    }
-    if (modalHandle === "preference") {
-        console.log("Select Preference")
-        document.querySelector("#modals-container > div > div > div > div > button").click()
-        modalHandle = "closePreference"
-    }
-    if (modalHandle === "closePreference") {
-        console.log("checkout btn clicked")
-        document.querySelector("#root button[data-tracking-id='rtp-checkout-button']").click()
-        waitTravelInfoPage();
-        waitPaymentPage();
-        modalHandle = "checkout"
-    }
+(() => {
+    console.log("load btn")
+    createBtn()
 
-
-    if (modalHandle === "closeTo") {
-        console.log("Closing To modal")
-        modalHandle = "date"
-    }
-    if (modalHandle === "closeDate") {
-        console.log("Closing Date modal")
-        setTimeout(function () {
-            document.querySelector("#root > div > div > div > div > div > div:nth-child(6) button").click()
-            waitJourneysPage();
-        }, 1000)
-        modalHandle = ""
-    }
-})
-
-createBtn()
+    chrome.runtime.onMessage.addListener((obj, sender, response) => {
+        console.log("received message: " + JSON.stringify(obj))
+        const { type, value, videoId } = obj;
+        if (type ==="Play"){
+            startTests()
+        }
+        if (type ==="Stop"){
+            modalHandle = ""
+        }
+    })
+})();

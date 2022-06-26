@@ -1,16 +1,16 @@
 {
-  "name": "My YT Bookmarks",
+  "name": "Eta tests",
   "version": "0.1.0",
   "description": "Saving timestamps in YT videos",
   "permissions": ["storage", "tabs"],
-  "host_permissions": ["https://*.youtube.com/*"],
+  "host_permissions": ["https://*.rcqa10.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.youtube.com/*"],
-      "js": ["contentScript.js"]
+      "matches": ["https://*.rcqa10.com/*"],
+      "js": ["eta.js"]
     }
   ],
   "web_accessible_resources": [
@@ -21,7 +21,7 @@
         "assets/delete.png",
         "assets/save.png"
       ],
-      "matches": ["https://*.youtube.com/*"]
+      "matches": ["https://*.rcqa10.com/*"]
     }
   ],
   "action": {

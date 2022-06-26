@@ -39,14 +39,26 @@ const viewBookmarks = (currentBookmarks=[]) => {
 };
 
 const onPlay = async e => {
-  const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
+  // const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
 
   chrome.tabs.sendMessage(activeTab.id, {
-    type: "PLAY",
-    value: bookmarkTime,
+    type: "Play",
+    value: activeTab,
   });
 };
+
+
+const onStop = async e => {
+  // const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
+  const activeTab = await getActiveTabURL();
+
+  chrome.tabs.sendMessage(activeTab.id, {
+    type: "Stop",
+    value: activeTab,
+  });
+};
+
 
 const onDelete = async e => {
   const activeTab = await getActiveTabURL();
@@ -74,22 +86,30 @@ const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  const activeTab = await getActiveTabURL();
-  const queryParameters = activeTab.url.split("?")[1];
-  const urlParameters = new URLSearchParams(queryParameters);
-
-  const currentVideo = urlParameters.get("v");
-
-  if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
-    chrome.storage.sync.get([currentVideo], (data) => {
-      const currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
-
-      viewBookmarks(currentVideoBookmarks);
-    });
-  } else {
-    const container = document.getElementsByClassName("container")[0];
-
-    container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
-  }
+  // const activeTab = await getActiveTabURL();
+  // const queryParameters = activeTab.url.split("?")[1];
+  // const urlParameters = new URLSearchParams(queryParameters);
+  //
+  // const currentVideo = urlParameters.get("v");
+  //
+  // if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
+  //   chrome.storage.sync.get([currentVideo], (data) => {
+  //     const currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
+  //
+  //     viewBookmarks(currentVideoBookmarks);
+  //   });
+  // } else {
+  //   const container = document.getElementsByClassName("container")[0];
+  //
+  //   container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
+  // }
+  const container = document.getElementsByClassName("container")[0];
+  container.innerHTML = '<button class="btn-run">Run tests</button> <button class="btn-stop">Stop tests</button>';
+  document.getElementsByClassName("btn-run")[0].addEventListener("click", function (e) {
+    onPlay(e)
+  });
+  document.getElementsByClassName("btn-stop")[0].addEventListener("click", function (e) {
+    onStop(e)
+  });
 });
 
