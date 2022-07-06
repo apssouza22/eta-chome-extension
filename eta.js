@@ -1,83 +1,51 @@
-// Start observing mutation of element. On change, the
-//   the callback is called with Boolean visibility as
-//   argument:
-
-respondToMutation(document.querySelector("#modals-container"), function (i) {
-    console.log(modalHandle)
-    if (modalHandle === "from") {
-        console.log("Selecting station FROM")
-        let selector = document.querySelector("#modals-container > div > div li");
-        stationFrom = selector.textContent
-        selector.click()
-        modalHandle = "to"
-        setTimeout(function () {
-            document.querySelector("#root > div > div > div > div > div > div:nth-child(3) > div > div > button:nth-child(2)").click()
-        }, 500)
-        return
-    }
-
-    if (modalHandle === "fare") {
-        console.log("Selecting fare")
-        document.querySelector("#modals-container > div > div > div > div > div > div > button").click()
-        modalHandle = "closeFare"
-        waitPreferencePage();
-    }
-    if (modalHandle === "preference") {
-        console.log("Select Preference")
-        document.querySelector("#modals-container > div > div > div > div > button").click()
-        modalHandle = "closePreference"
-    }
-    if (modalHandle === "closePreference") {
-        console.log("checkout btn clicked")
-        document.querySelector("#root button[data-tracking-id='rtp-checkout-button']").click()
-        waitTravelInfoPage();
-        waitPaymentPage();
-        modalHandle = "checkout"
-    }
-
-    if (modalHandle === "closeTo") {
-        console.log("Closing To modal")
-        modalHandle = "date"
-    }
-    if (modalHandle === "closeDate") {
-        console.log("Closing Date modal")
-        setTimeout(function () {
-            document.querySelector("#root > div > div > div > div > div > div:nth-child(6) button").click()
-            waitJourneysPage();
-        }, 1000)
-        modalHandle = ""
-    }
-})
-
-function respondToMutation(element, callback) {
-    // create an observer instance
-    var observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            console.log(mutation.type)
-            callback(mutation.type);
-        });
-    });
-
-    // configuration of the observer:
-    var config = {attributes: true, childList: true, characterData: true};
-
-    // pass in the target node, as well as the observer options
-    observer.observe(element, config);
-}
-
-modalHandle = "from"
+nextStep = "from"
 stationFrom = ""
+
+function waitModalStationFrom() {
+    let interval = setInterval(function () {
+        let element = document.querySelector("#modals-container > div > div li");
+        if (nextStep === "from" && element) {
+            clearInterval(interval)
+            console.log("Selecting station FROM")
+            let selector = document.querySelector("#modals-container > div > div li");
+            stationFrom = selector.textContent
+            selector.click()
+            nextStep = "to"
+            setTimeout(function () {
+                console.log("Click To button")
+                document.querySelector("#root > div > div > div > div > div > div:nth-child(3) > div > div > button:nth-child(2)").click()
+                waitModalStationTo();
+            }, 500)
+        }
+    })
+}
 
 function waitJourneysPage() {
     let loadJourneysInterval = setInterval(function () {
         // Waiting the journeys to be loaded
         if (document.querySelector("#root > div > div:nth-child(1) > div > div > div > div:nth-child(2) div").children.length > 3) {
             clearInterval(loadJourneysInterval)
-            // Select journey
+            console.log("Selecting journey")
             document.querySelector("#root > div > div:nth-child(1) > div > div > div > div > div > div:nth-child(3) > div").click()
-            modalHandle = "fare"
+
+            setTimeout(function () {
+                console.log("Selecting fare")
+                document.querySelector("#modals-container > div > div > div > div > div > div > button").click()
+            }, 1000)
+
+            waitPreferencePage();
         }
     }, 1000)
+}
+
+function triggerCheckoutButton() {
+    setTimeout(function () {
+        console.log("checkout btn clicked")
+        document.querySelector("#root button[data-tracking-id='rtp-checkout-button']").click()
+    }, 1000)
+    waitTravelInfoPage();
+    waitPaymentPage();
+    nextStep = "checkout"
 }
 
 function waitPreferencePage() {
@@ -86,8 +54,14 @@ function waitPreferencePage() {
         if (getPreferenceBtn) {
             clearInterval(loadRtpInterval)
             console.log("Open Preference modal")
-            getPreferenceBtn.click()
-            modalHandle = "preference"
+            getPreferenceBtn?.click()
+            nextStep = "preference"
+
+            setTimeout(function () {
+                console.log("Select Preference")
+                document.querySelector("#modals-container > div > div > div > div > button")?.click()
+                triggerCheckoutButton();
+            }, 1000)
         }
     }, 1000)
 }
@@ -99,7 +73,7 @@ function waitTravelInfoPage() {
             clearInterval(loadTravelInfoInterval)
             console.log("Press continue button")
             continueBtn.click()
-            modalHandle = "continue"
+            nextStep = "continue"
         }
     }, 1000)
 }
@@ -112,8 +86,8 @@ function waitPaymentPage() {
             clearInterval(loadPaymentInterval)
             setTimeout(function () {
                 bookNowBtn.click()
-            }, 500)
-            modalHandle = "book"
+            }, 1000)
+            nextStep = "book"
         }
     }, 1000)
 }
@@ -121,12 +95,16 @@ function waitPaymentPage() {
 function waitDepartCalendar() {
     let interval = setInterval(function () {
         let calendarDayEl = document.querySelector(".CalendarDay[aria-disabled='false']:last-child");
-        if (modalHandle === "date" && calendarDayEl) {
+        if (nextStep === "date" && calendarDayEl) {
             console.log("Selecting date")
             clearInterval(interval)
             calendarDayEl.click()
             document.querySelector("#modals-container > div > div > div > button").click()
-            modalHandle = "closeDate"
+            setTimeout(function () {
+                document.querySelector("#root > div > div > div > div > div > div:nth-child(6) button").click()
+                waitJourneysPage();
+            }, 1000)
+            nextStep = ""
         }
     }, 1000)
 }
@@ -134,7 +112,7 @@ function waitDepartCalendar() {
 function waitModalStationTo() {
     let interval = setInterval(function () {
         let element = document.querySelector("#modals-container > div > div li");
-        if (modalHandle === "to" && element) {
+        if (nextStep === "to" && element) {
             console.log("Selecting station TO")
             clearInterval(interval)
             console.log(stationFrom, " ", element.textContent)
@@ -143,18 +121,19 @@ function waitModalStationTo() {
             }
             console.log(stationFrom, " - ", element.textContent)
             element.click()
-            modalHandle = "closeTo"
             setTimeout(function () {
-                // click date btn
+                console.log("Click date button")
                 document.querySelector("#root > div > div > div > div > div > div:nth-child(4) > div > div > button:nth-child(1)").click()
+                waitDepartCalendar();
             }, 1000)
+            nextStep = "date"
         }
     }, 1000)
 }
 
 function startTests(e) {
-    waitDepartCalendar();
-    waitModalStationTo();
+    waitModalStationFrom()
+
     // select train segment
     document.querySelector("#root > div > div:nth-child(1) > div > div > div > div > button:nth-child(2)").click()
     // select From
@@ -164,12 +143,12 @@ function startTests(e) {
 (() => {
     chrome.runtime.onMessage.addListener((obj, sender, response) => {
         console.log("received message: " + JSON.stringify(obj))
-        const { type, value, videoId } = obj;
-        if (type ==="Play"){
+        const {type, value, videoId} = obj;
+        if (type === "Play") {
             startTests()
         }
-        if (type ==="Stop"){
-            modalHandle = ""
+        if (type === "Stop") {
+            nextStep = ""
         }
     })
 })();
