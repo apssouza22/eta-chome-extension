@@ -10,19 +10,28 @@ class EttaAutomatedTest {
     calendarDayElement = ".CalendarDay[aria-disabled='false']:last-child"
     confirmDateButton = "#modals-container > div > div > div > button"
     searchTrainButton = "#root > div > div > div > div > div > div:nth-child(6) button"
+    journeysContainer = "#root > div > div:nth-child(1) > div > div > div > div:nth-child(2) div"
+    firstJourneyItem = "#root > div > div:nth-child(1) > div > div > div > div > div > div:nth-child(3) > div"
+    firstFareButton = "#modals-container > div > div > div > div > div > div > button"
+    getPreferenceBtn = "#root > div > div:nth-child(1) > div > div > div > div > div > div > div > div > a"
+    confirmPreferenceBtn = "#modals-container > div > div > div > div > button"
 
     nextStep = "from"
+    intervalLoadRtpPage;
     intervalModalStationFrom;
     intervalModalStationTo;
     intervalModalDate;
+    intervalLoadJourneys;
     from;
     to;
+    intervals = []
 
     constructor() {
+
     }
 
     startTests(e) {
-        console.log("From the class")
+        console.log("Starting tests...")
         this.waitModalStationFrom()
         document.querySelector(this.trainSegmentOption).click()
         document.querySelector(this.stationFromButton).click()
@@ -88,87 +97,101 @@ class EttaAutomatedTest {
                 document.querySelector(self.confirmDateButton).click()
                 setTimeout(() => {
                     document.querySelector(self.searchTrainButton).click()
-                    // waitJourneysPage();
+                    self.waitJourneysPage();
                 }, 1000)
                 self.nextStep = ""
             }
         }, 1000)
     }
-}
 
+    waitJourneysPage() {
+        self = this;
+        self.intervalLoadJourneys = setInterval(function () {
+            // Waiting the journeys to be loaded
+            if (document.querySelector(self.journeysContainer).children.length > 3) {
+                clearInterval(self.intervalLoadJourneys)
+                console.log("Selecting journey")
+                document.querySelector(self.firstJourneyItem).click()
 
-function waitJourneysPage() {
-    let loadJourneysInterval = setInterval(function () {
-        // Waiting the journeys to be loaded
-        if (document.querySelector("#root > div > div:nth-child(1) > div > div > div > div:nth-child(2) div").children.length > 3) {
-            clearInterval(loadJourneysInterval)
-            console.log("Selecting journey")
-            document.querySelector("#root > div > div:nth-child(1) > div > div > div > div > div > div:nth-child(3) > div").click()
+                setTimeout(function () {
+                    console.log("Selecting fare")
+                    document.querySelector(self.firstFareButton).click()
+                }, 1000)
 
-            setTimeout(function () {
-                console.log("Selecting fare")
-                document.querySelector("#modals-container > div > div > div > div > div > div > button").click()
-            }, 1000)
+                self.waitPreferencePage();
+            }
+        }, 1000)
+    }
 
-            waitPreferencePage();
+    waitPreferencePage() {
+        self = this;
+
+        self.intervalLoadRtpPage = setInterval(function () {
+            let getPreferenceBtn = document.querySelector(self.getPreferenceBtn);
+            if (getPreferenceBtn) {
+                clearInterval(self.intervalLoadRtpPage)
+                console.log("Open Preference modal")
+                getPreferenceBtn?.click()
+                nextStep = "preference"
+
+                setTimeout(function () {
+                    console.log("Select Preference")
+                    document.querySelector(self.confirmPreferenceBtn)?.click()
+                    self.triggerCheckoutButton();
+                }, 1000)
+            }
+        }, 1000)
+    }
+
+    triggerCheckoutButton() {
+        setTimeout(function () {
+            console.log("checkout btn clicked")
+            document.querySelector("#root button[data-tracking-id='rtp-checkout-button']").click()
+        }, 1000)
+        this.waitTravelInfoPage();
+        this.waitPaymentPage();
+    }
+
+    waitTravelInfoPage() {
+        let loadTravelInfoInterval = setInterval(function () {
+            let continueBtn = document.querySelector("#root button[data-tracking-id='traveler-info-continue-button']");
+            if (continueBtn) {
+                clearInterval(loadTravelInfoInterval)
+                console.log("Press continue button")
+                continueBtn.click()
+            }
+        }, 1000)
+    }
+
+    waitPaymentPage() {
+        let loadPaymentInterval = setInterval(function () {
+            let bookNowBtn = document.querySelector("#root button[data-tracking-id='book-trip-button']");
+            if (bookNowBtn) {
+                console.log("Press Book now button")
+                clearInterval(loadPaymentInterval)
+                setTimeout(function () {
+                    bookNowBtn.click()
+                }, 1000)
+            }
+        }, 1000)
+    }
+
+    stop() {
+        console.log("Stopping execution...")
+        this.nextStep = ""
+        let intervals = [
+            self.intervalLoadRtpPage,
+            self.intervalModalStationFrom,
+            self.intervalModalStationTo,
+            self.intervalModalDate,
+            self.intervalLoadJourneys,
+        ]
+        for (const interval of intervals) {
+            console.log("Stopping intervals")
+            clearInterval(interval)
         }
-    }, 1000)
+    }
 }
-
-function triggerCheckoutButton() {
-    setTimeout(function () {
-        console.log("checkout btn clicked")
-        document.querySelector("#root button[data-tracking-id='rtp-checkout-button']").click()
-    }, 1000)
-    waitTravelInfoPage();
-    waitPaymentPage();
-    nextStep = "checkout"
-}
-
-function waitPreferencePage() {
-    let loadRtpInterval = setInterval(function () {
-        let getPreferenceBtn = document.querySelector("#root > div > div:nth-child(1) > div > div > div > div > div > div > div > div > a");
-        if (getPreferenceBtn) {
-            clearInterval(loadRtpInterval)
-            console.log("Open Preference modal")
-            getPreferenceBtn?.click()
-            nextStep = "preference"
-
-            setTimeout(function () {
-                console.log("Select Preference")
-                document.querySelector("#modals-container > div > div > div > div > button")?.click()
-                triggerCheckoutButton();
-            }, 1000)
-        }
-    }, 1000)
-}
-
-function waitTravelInfoPage() {
-    let loadTravelInfoInterval = setInterval(function () {
-        let continueBtn = document.querySelector("#root button[data-tracking-id='traveler-info-continue-button']");
-        if (continueBtn) {
-            clearInterval(loadTravelInfoInterval)
-            console.log("Press continue button")
-            continueBtn.click()
-            nextStep = "continue"
-        }
-    }, 1000)
-}
-
-function waitPaymentPage() {
-    let loadPaymentInterval = setInterval(function () {
-        let bookNowBtn = document.querySelector("#root button[data-tracking-id='book-trip-button']");
-        if (bookNowBtn) {
-            console.log("Press Book now button")
-            clearInterval(loadPaymentInterval)
-            setTimeout(function () {
-                bookNowBtn.click()
-            }, 1000)
-            nextStep = "book"
-        }
-    }, 1000)
-}
-
 
 (() => {
     test = new EttaAutomatedTest()
@@ -179,7 +202,7 @@ function waitPaymentPage() {
             test.startTests()
         }
         if (type === "Stop") {
-            nextStep = ""
+            test.stop()
         }
     })
 })();
