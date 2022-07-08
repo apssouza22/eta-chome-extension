@@ -12,7 +12,6 @@ const onPlay = async e => {
 
 
 const onStop = async e => {
-  // const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
   const activeTab = await getActiveTabURL();
 
   chrome.tabs.sendMessage(activeTab.id, {
