@@ -24,7 +24,6 @@ class EttaAutomatedTest {
     intervalLoadJourneys;
     from;
     to;
-    intervals = []
 
     constructor() {
 
@@ -62,11 +61,6 @@ class EttaAutomatedTest {
         this.intervalModalStationTo = setInterval(function () {
             let listOfStations = document.querySelectorAll(self.stationOptionElement);
             let element = listOfStations[0];
-            // for(const value of listOfStations) {
-            //     if (value.textContent){
-            //         element = value
-            //     }
-            // }
             if (self.nextStep === "to" && element) {
                 console.log("Selecting station TO")
                 clearInterval(self.intervalModalStationTo)
@@ -106,7 +100,7 @@ class EttaAutomatedTest {
 
     waitJourneysPage() {
         self = this;
-        self.intervalLoadJourneys = setInterval(function () {
+        self.intervalLoadJourneys = setInterval( ()=> {
             // Waiting the journeys to be loaded
             if (document.querySelector(self.journeysContainer).children.length > 3) {
                 clearInterval(self.intervalLoadJourneys)
@@ -126,7 +120,7 @@ class EttaAutomatedTest {
     waitPreferencePage() {
         self = this;
 
-        self.intervalLoadRtpPage = setInterval(function () {
+        self.intervalLoadRtpPage = setInterval( ()=> {
             let getPreferenceBtn = document.querySelector(self.getPreferenceBtn);
             if (getPreferenceBtn) {
                 clearInterval(self.intervalLoadRtpPage)
@@ -134,7 +128,7 @@ class EttaAutomatedTest {
                 getPreferenceBtn?.click()
                 nextStep = "preference"
 
-                setTimeout(function () {
+                setTimeout( ()=> {
                     console.log("Select Preference")
                     document.querySelector(self.confirmPreferenceBtn)?.click()
                     self.triggerCheckoutButton();
@@ -144,7 +138,7 @@ class EttaAutomatedTest {
     }
 
     triggerCheckoutButton() {
-        setTimeout(function () {
+        setTimeout( ()=> {
             console.log("checkout btn clicked")
             document.querySelector("#root button[data-tracking-id='rtp-checkout-button']").click()
         }, 1000)
@@ -153,18 +147,29 @@ class EttaAutomatedTest {
     }
 
     waitTravelInfoPage() {
-        let loadTravelInfoInterval = setInterval(function () {
+        let loadTravelInfoInterval = setInterval( () =>{
             let continueBtn = document.querySelector("#root button[data-tracking-id='traveler-info-continue-button']");
             if (continueBtn) {
-                clearInterval(loadTravelInfoInterval)
-                console.log("Press continue button")
-                continueBtn.click()
+                console.log("Setting delivery preferences")
+                let editPrefBtn = document.querySelector("#root > div > div:nth-child(1) > div > div > div  > div > div > div > a")
+                if (editPrefBtn) {
+                    editPrefBtn.click()
+                }
+                setTimeout( ()=> {
+                    let saveTrainPrefBtn = document.querySelector("#modals-container > div > div > div > button")
+                    if (saveTrainPrefBtn) {
+                        saveTrainPrefBtn.click()
+                    }
+                    clearInterval(loadTravelInfoInterval)
+                    console.log("Press continue button")
+                    continueBtn.click()
+                }, 1000)
             }
         }, 1000)
     }
 
     waitPaymentPage() {
-        let loadPaymentInterval = setInterval(function () {
+        let loadPaymentInterval = setInterval( () => {
             let bookNowBtn = document.querySelector("#root button[data-tracking-id='book-trip-button']");
             if (bookNowBtn) {
                 console.log("Press Book now button")
@@ -194,7 +199,7 @@ class EttaAutomatedTest {
 }
 
 (() => {
-    test = new EttaAutomatedTest()
+    const test = new EttaAutomatedTest()
     chrome.runtime.onMessage.addListener((obj, sender, response) => {
         console.log("received message: " + JSON.stringify(obj))
         const {type, value, videoId} = obj;
