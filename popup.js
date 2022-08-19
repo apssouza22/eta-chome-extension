@@ -23,7 +23,7 @@ const onStop = async e => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementsByClassName("container")[0];
-  container.innerHTML = '<button class="btn-run">Run tests</button> <button class="btn-stop">Stop tests</button>';
+  container.innerHTML = '<button class="btn-run">Run Rail One-Way Test</button> <button class="btn-stop">Stop Test</button>';
   document.getElementsByClassName("btn-run")[0].addEventListener("click", function (e) {
     onPlay(e)
   });
