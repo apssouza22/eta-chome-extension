@@ -31,9 +31,16 @@ class EttaAutomatedTest {
 
     startTests(e) {
         console.log("Starting tests...")
+        document.querySelector("a[data-tracking-id='navigation_book-button']").click()
         this.waitModalStationFrom()
-        document.querySelector(this.trainSegmentOption).click()
-        document.querySelector(this.stationFromButton).click()
+        let trainStationSegment = document.querySelector(this.trainSegmentOption);
+        let interval = setInterval(() => {
+            if (trainStationSegment) {
+                clearInterval(interval)
+                trainStationSegment.click()
+                document.querySelector(this.stationFromButton).click()
+            }
+        }, 2000)
     }
 
     waitModalStationFrom() {
