@@ -9,7 +9,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.rcqa10.com/*"],
+      "matches": ["https://*.rcqa10.com/*", "https://*.rcqa13.com/*", "https://*.deemstage3.com/*"],
       "js": ["eta.js"]
     }
   ],
