@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "description": "Enable automated tests on the Eta UI",
   "permissions": ["storage", "tabs"],
-  "host_permissions": ["https://*.rcqa10.com/*"],
+  "host_permissions": ["https://*.rcqa10.com/*","https://*.rcqa14.com/*", "https://*.deemstage3.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.rcqa10.com/*", "https://*.rcqa13.com/*", "https://*.deemstage3.com/*"],
+      "matches": ["https://*.rcqa10.com/*", "https://*.rcqa13.com/*","https://*.rcqa14.com/*", "https://*.deemstage3.com/*"],
       "js": ["eta.js"]
     }
   ],
